@@ -1,0 +1,75 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+//  https://github.com/pantharshit00/prisma-docs-generator
+generator docs {
+  provider = "node node_modules/prisma-docs-generator"
+}
+
+//  https://github.com/keonik/prisma-erd-generator
+generator erd {
+  provider = "prisma-erd-generator"
+}
+
+//  https://github.com/notiz-dev/prisma-dbml-generator
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  username          String    @unique
+  password          String
+  purchases        Purchase[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Cd {
+  id                String    @id @default(uuid())
+  artist            String 
+  price             Float
+  genres            CdOnGenres[]
+  purchases         PurchaseOnCds[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Purchase {
+  id                String    @id @default(uuid())
+  user              User      @relation(fields: [userId], references: [id])
+  userId            String
+  cds               PurchaseOnCds[]
+  createdAt         DateTime  @default(now())
+}
+
+model PurchaseOnCds {
+  cd                Cd        @relation(fields: [cdId], references: [id])
+  cdId              String
+  purchase          Purchase  @relation(fields: [purchaseId], references: [id])
+  purchaseId        String
+
+  @@id([cdId, purchaseId])
+}
+
+model CdOnGenres {
+  genre             Genre     @relation(fields: [genreId], references: [id])
+  genreId           Int
+  cd                Cd        @relation(fields: [cdId], references: [id])
+  cdId              String    
+
+  @@id([genreId, cdId])
+}
+
+model Genre {
+  id                Int    @id @default(autoincrement())
+  name              String
+  genres            CdOnGenres[]
+}
