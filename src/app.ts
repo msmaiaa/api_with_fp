@@ -1,6 +1,9 @@
 import config from './config'
 import express from 'express'
+import { logger, loggerParams } from './middlewares/logger'
 const app = express()
+
+app.use(logger(loggerParams))
 
 const start = () => {
   try {
